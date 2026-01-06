@@ -62,7 +62,6 @@ Do NOT use markdown symbols like **, ##, or -.`;
     // Basic formatting: replace double newlines with <br/><br/> and **bold** with <b>
     // Although the prompt asks for no markdown, the fallback logic is requested by the user.
     const formattedText = text
-      .replace(/\n/g, '<br/>')
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
     res.status(200).json({ data: formattedText });
