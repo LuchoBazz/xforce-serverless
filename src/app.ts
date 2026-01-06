@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/grammar', async (req: Request, res: Response) => {
+app.post('/api/languages/english/grammar', async (req: Request, res: Response) => {
   try {
     const { level, concept, description, example } = req.body;
 
