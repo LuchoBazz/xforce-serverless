@@ -11,7 +11,7 @@ app.use(express.json());
 
 app.post('/api/languages/english/grammar', async (req: Request, res: Response) => {
   try {
-    const { level, concept, description, example } = req.body;
+    const { level, concept, description, example, theme } = req.body;
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).send('GEMINI_API_KEY is not set');
@@ -21,7 +21,8 @@ app.post('/api/languages/english/grammar', async (req: Request, res: Response) =
       level: level || 'B1',
       concept: concept || 'Grammar',
       description: description || 'No description provided',
-      example: example || 'No example provided'
+      example: example || 'No example provided',
+      theme: theme || "light",
     };
 
     const prompt = `Act as a professional English teacher. Provide a detailed, easy-to-understand grammar explanation in English for:
@@ -32,7 +33,7 @@ app.post('/api/languages/english/grammar', async (req: Request, res: Response) =
 
 Give your answer in B1/B2 English.
 
-IMPORTANT: Please provide the response in valid, semantic HTML format with Tailwind classes (without \`\`\`html code blocks or markdown). 
+IMPORTANT: Please provide the response in valid, semantic HTML format with Tailwind classes with the theme ${topic.theme} (without \`\`\`html code blocks or markdown). 
 Do NOT use markdown symbols like **, ##, or -.`;
 
     const geminiApiKey = process.env.GEMINI_API_KEY;
