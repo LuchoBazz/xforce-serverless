@@ -36,7 +36,7 @@ IMPORTANT: Please provide the response in valid, semantic HTML format with Tailw
 Do NOT use markdown symbols like **, ##, or -.`;
 
     const geminiApiKey = process.env.GEMINI_API_KEY;
-    
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
@@ -50,31 +50,30 @@ Do NOT use markdown symbols like **, ##, or -.`;
     });
 
     if (!response.ok) {
-       const errorData = await response.text();
-       console.error('Gemini API Error:', errorData);
-       return res.status(response.status).send(`Error from Gemini API: ${response.statusText}`);
+      const errorData = await response.text();
+      console.error('Gemini API Error:', errorData);
+      return res.status(response.status).send(`Error from Gemini API: ${response.statusText}`);
     }
 
     const data = await response.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate an explanation at this moment.";
-    
+
     // Basic formatting: replace double newlines with <br/><br/> and **bold** with <b>
     // Although the prompt asks for no markdown, the fallback logic is requested by the user.
     const formattedText = text
       .replace(/\n/g, '<br/>')
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-    res.send(formattedText);
-
+    res.status(200).json({ data: formattedText });
   } catch (error) {
     console.error('Server error:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send({ errors: [{ message: 'Internal server error' }] });
   }
 });
 
 // Health check
 app.get('/', (req: Request, res: Response) => {
-    res.send('XForce Serverless API is running');
+  res.status(200).json({ status: 'XForce Serverless API is running' });
 });
 
 export default app;
