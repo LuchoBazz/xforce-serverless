@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -38,25 +39,13 @@ Do NOT use markdown symbols like **, ##, or -.`;
 
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
-      })
+    const response = await axios.post(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`, {
+      contents: [{parts: [{ text: prompt }]}]
+    }, {
+      headers: { 'Content-Type': 'application/json' }
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('Gemini API Error:', errorData);
-      return res.status(response.status).send(`Error from Gemini API: ${response.statusText}`);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate an explanation at this moment.";
 
     // Basic formatting: replace double newlines with <br/><br/> and **bold** with <b>
