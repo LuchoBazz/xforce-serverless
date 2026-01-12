@@ -125,11 +125,20 @@ You must follow this exact schema (using "take off" as the template):
     const data = response.data;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate an explanation at this moment.";
 
-    // The prompt requests only JSON, so we should not format as HTML or Markdown.
-    // However, we can trim whitespace and ensure it's a valid string for the response.
-    const formattedText = typeof text === 'string' ? text.trim() : text;
+    // The prompt requests only JSON. Gemini may still wrap it in ```json ... ```.
+    // Strip fences and, if possible, parse to real JSON.
+    const rawText = typeof text === 'string' ? text.trim() : '';
+    const unfenced = rawText
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/i, '')
+      .trim();
 
-    res.status(200).json({ data: formattedText });
+    try {
+      const parsed = JSON.parse(unfenced);
+      res.status(200).json({ data: parsed });
+    } catch {
+      res.status(500).send({ errors: [{ message: "Sorry, I couldn't generate an explanation at this moment." }] });
+    }
   } catch (error) {
     console.error('Server error:', error);
     res.status(500).send({ errors: [{ message: 'Internal server error' }] });
