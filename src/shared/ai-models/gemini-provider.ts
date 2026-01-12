@@ -38,6 +38,7 @@ export class GeminiProvider implements AIProvider {
 
       return response.data.candidates[0].content.parts[0].text;
     } catch (error) {
+      console.error('[GeminiProvider] Error generating text:', error);
       throw error;
     }
   }
