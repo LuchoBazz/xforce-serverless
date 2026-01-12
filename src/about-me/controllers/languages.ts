@@ -1,13 +1,9 @@
 import { Request, Response } from 'express';
-import axios from 'axios';
+import { aiClient } from '../../shared/ai-models/ai-client';
 
 export const englishGrammarController = async (req: Request, res: Response) => {
   try {
     const { level, concept, description, example, theme } = req.body;
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).send('GEMINI_API_KEY is not set');
-    }
 
     const topic = {
       level: level || 'B1',
@@ -28,16 +24,8 @@ Give your answer in B1/B2 English.
 IMPORTANT: Please provide the response in valid, semantic HTML format with Tailwind classes with the theme ${topic.theme} (without \`\`\`html code blocks or markdown). 
 Do NOT use markdown symbols like **, ##, or -.`;
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-
-    const response = await axios.post(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`, {
-      contents: [{parts: [{ text: prompt }]}]
-    }, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    const data = response.data;
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate an explanation at this moment.";
+    const { text: generatedText } = await aiClient.ask(prompt);
+    const text = generatedText || "Sorry, I couldn't generate an explanation at this moment.";
 
     // Basic formatting: replace double newlines with <br/><br/> and **bold** with <b>
     // Although the prompt asks for no markdown, the fallback logic is requested by the user.
@@ -55,10 +43,6 @@ Do NOT use markdown symbols like **, ##, or -.`;
 export const englishPhrasalVerbMasterController = async (req: Request, res: Response) => {
   try {
     const { verb } = req.body;
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).send('GEMINI_API_KEY is not set');
-    }
 
     const input = { verb: verb || 'Not provided' };
 
@@ -114,16 +98,7 @@ You must follow this exact schema (using "take off" as the template):
 **My Phrasal Verb is:** "${input.verb}"
 `;
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-
-    const response = await axios.post(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${geminiApiKey}`, {
-      contents: [{parts: [{ text: prompt }]}]
-    }, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    const data = response.data;
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate an explanation at this moment.";
+    const { text } = await aiClient.ask(prompt);
 
     // The prompt requests only JSON. Gemini may still wrap it in ```json ... ```.
     // Strip fences and, if possible, parse to real JSON.
