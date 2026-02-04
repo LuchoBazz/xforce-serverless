@@ -119,3 +119,37 @@ You must follow this exact schema (using "take off" as the template):
     res.status(500).send({ errors: [{ message: 'Internal server error' }] });
   }
 };
+
+export const englishIeltsReadingController = async (req: Request, res: Response) => {
+  try {
+    const { topic, category } = req.body;
+
+    const input = { topic: topic || 'The History of Tea', category: category || 'History' };
+
+    const prompt = `**Role:** Act as an expert IELTS Academic tutor and content creator.
+**Task:** Based on the topic ${input.topic} within the category of ${input.category}, write a high-quality reading passage and a set of practice questions that mimic the IELTS Academic Reading module.
+**Requirements for the Text:**
+* **Length:** Between 700 and 900 words.
+* **Complexity:** Use a mix of "Band 7-8" vocabulary and complex grammatical structures (passive voice, relative clauses, etc.).
+* **Structure:** Organize the text into 6-8 clearly labeled paragraphs (Paragraph A, B, C, etc.).
+* **Tone:** Formal, academic, and informative, similar to sources like *The Economist*, *Scientific American*, or *National Geographic*.
+
+**Requirements for the Assessment:**
+After the text, provide 10-12 questions following these IELTS formats:
+1. **Matching Headings** or **True/False/Not Given**.
+2. **Summary Completion** (with or without a word bank).
+3. **Multiple Choice**.
+
+**Vocabulary List:** At the very end, include a "Glossary of Academic Terms" used in the text with their definitions to help me improve my Lexical Resource.
+**Answer Key:** Provide the answers at the bottom, hidden behind a "Spoiler" or clearly separated so I don't see them immediately.
+
+IMPORTANT: Please format the response in Markdown.`;
+
+    const { text } = await aiClient.ask(prompt);
+
+    res.status(200).json({ data: text });
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).send({ errors: [{ message: 'Internal server error' }] });
+  }
+};
