@@ -126,26 +126,33 @@ export const englishIeltsReadingController = async (req: Request, res: Response)
 
     const input = { topic: topic || 'The History of Tea', category: category || 'History' };
 
-    const prompt = `**Role:** Act as an expert IELTS Academic tutor and content creator.
-**Task:** Based on the topic ${input.topic} within the category of ${input.category}, write a high-quality reading passage and a set of practice questions that mimic the IELTS Academic Reading module.
-**Requirements for the Text:**
-* **Length:** Between 700 and 900 words.
-* **Complexity:** Use a mix of "Band 7-8" vocabulary and complex grammatical structures (passive voice, relative clauses, etc.).
-* **Structure:** Organize the text into 6-8 clearly labeled paragraphs (Paragraph A, B, C, etc.).
-* **Tone:** Formal, academic, and informative, similar to sources like *The Economist*, *Scientific American*, or *National Geographic*.
+    const promptText = `
+    **Role:** Act as an expert IELTS Academic tutor and content creator.
+    **Task:** Based on the topic ${input.topic} within the category of ${input.category}, write a high-quality reading passage and a set of practice questions that mimic the IELTS Academic Reading module.
+    
+    **Requirements for the Text:**
+    * **Length:** Between 600 and 800 words.
+    * **Complexity:** Use a mix of "Band 7-8" vocabulary and complex grammatical structures.
+    * **Structure:** Organize the text into 6-8 clearly labeled paragraphs (Paragraph A, B, C, etc.).
+    * **Tone:** Formal, academic, and informative.
 
-**Requirements for the Assessment:**
-After the text, provide 10-12 questions following these IELTS formats:
-1. **Matching Headings** or **True/False/Not Given**.
-2. **Summary Completion** (with or without a word bank).
-3. **Multiple Choice**.
+    **Requirements for the Assessment:**
+    After the text, provide 10-12 questions following these IELTS formats:
+    1. **Matching Headings** or **True/False/Not Given**.
+    2. **Summary Completion**.
+    3. **Multiple Choice**.
 
-**Vocabulary List:** At the very end, include a "Glossary of Academic Terms" used in the text with their definitions to help me improve my Lexical Resource.
-**Answer Key:** Provide the answers at the bottom, hidden behind a "Spoiler" or clearly separated so I don't see them immediately.
+    **Vocabulary List:** Include a "Glossary of Academic Terms".
+    **Answer Key:** Provide the answers at the very end.
 
-IMPORTANT: Please format the response in Markdown.`;
+    ***CRITICAL FORMATTING INSTRUCTION FOR UI PARSING***:
+    You must format the output exactly as follows so my code can split the views:
+    1. Write the Reading Passage first.
+    2. Then, strictly on a new line, print exactly this separator string: "|||SECTION_BREAK|||"
+    3. Then write the Questions, Glossary, and Answer Key.
+  `;
 
-    const { text } = await aiClient.ask(prompt);
+    const { text } = await aiClient.ask(promptText);
 
     res.status(200).json({ data: text });
   } catch (error) {
