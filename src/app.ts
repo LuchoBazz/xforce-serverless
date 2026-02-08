@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { englishGrammarController, englishPhrasalVerbMasterController, englishIeltsReadingController } from './about-me/controllers/languages';
+import { englishGrammarController, englishPhrasalVerbMasterController, englishIeltsReadingController, englishIeltsWordFamilyController } from './about-me/controllers/languages';
 import { healthCheckController } from './shared/controllers';
 import { culturalExplorerController } from './about-me/controllers/apps';
 
@@ -15,6 +15,7 @@ app.use(express.json());
 app.post('/api/languages/english/grammar', englishGrammarController);
 app.post('/api/languages/english/phrasal-verb-master', englishPhrasalVerbMasterController);
 app.post('/api/languages/english/ielts-reading', englishIeltsReadingController);
+app.post('/api/languages/english/ielts-word-family', englishIeltsWordFamilyController);
 app.post('/api/apps/cultural-explorer', culturalExplorerController);
 
 // Health check

@@ -160,3 +160,71 @@ export const englishIeltsReadingController = async (req: Request, res: Response)
     res.status(500).send({ errors: [{ message: 'Internal server error' }] });
   }
 };
+
+export const englishIeltsWordFamilyController = async (req: Request, res: Response) => {
+  try {
+    const { headword } = req.body;
+
+    const input = { headword: headword || 'Analysis' };
+
+    const prompt = `
+**Role:** You are an expert Linguist and Data Architect specializing in IELTS preparation (B2/C1 level).
+
+**Task:** I will provide you with a "Headword" from the Academic Word List. Your goal is to generate a strict JSON array containing the full word family for that headword.
+
+**Content Requirements:**
+
+1. **Headword & Translation:** The main word and its general Spanish translation.
+2. **Word Family:** Break down the word into \`verbs\`, \`nouns\`, \`adjectives\`, and \`adverbs\`.
+3. **Examples:** For every term, provide a **natural, spoken-English sentence** (IELTS Speaking style). The examples should sound like something a native speaker would say in a conversation or interview, not a rigid textbook definition.
+4. **Translations:** Provide the Spanish translation for the specific term.
+5. **Empty States:** If a grammatical form does not exist (e.g., no adverb), return an empty array \`[]\`.
+
+**Output Format:**
+Return **ONLY** the raw JSON array. Do not use Markdown code blocks (\`\`\`json), do not write introductions, and do not add explanations.
+
+**Target JSON Structure:**
+
+\`\`\`json
+{
+  "headword": "InputWord",
+  "overall_translation": "Traducción General",
+  "word_family": {
+    "verbs": [
+      { "term": "VerbForm", "translation": "Traducción", "example": "Natural spoken sentence using the verb." }
+    ],
+    "nouns": [
+      { "term": "NounForm", "translation": "Traducción", "example": "Natural spoken sentence using the noun." }
+    ],
+    "adjectives": [
+      { "term": "AdjForm", "translation": "Traducción", "example": "Natural spoken sentence using the adjective." }
+    ],
+    "adverbs": [
+      { "term": "AdvForm", "translation": "Traducción", "example": "Natural spoken sentence using the adverb." }
+    ]
+  }
+}
+\`\`\`
+
+**Input Word:** ${input.headword}
+`;
+
+    const { text } = await aiClient.ask(prompt);
+
+    const rawText = typeof text === 'string' ? text.trim() : '';
+    const unfenced = rawText
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/i, '')
+      .trim();
+
+    try {
+      const parsed = JSON.parse(unfenced);
+      res.status(200).json({ data: parsed });
+    } catch {
+      res.status(500).send({ errors: [{ message: "Sorry, I couldn't generate the word family at this moment." }] });
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    res.status(500).send({ errors: [{ message: 'Internal server error' }] });
+  }
+};
